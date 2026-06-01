@@ -36,4 +36,16 @@ import fs from "fs"
         }
     }
 
-export  {uploadOnCloudinary}
+
+    const deleteFromCloudinary=async(url,resource_type)=>{
+        try{
+            if(!url) return null
+            //if url present then extract publicId from cloudinary URL
+            const publicId=url.split("/").pop().split(".")[0]
+            await cloudinary.uploader.destroy(publicId,{resource_type,invalidate:true})
+        }catch(error){
+            console.log("Cloudinary delete error:",error)
+        }
+    }
+
+export  {uploadOnCloudinary,deleteFromCloudinary}
