@@ -1,5 +1,5 @@
 import {Router} from "express"
-import {getUserProfile, updateUserAvatar,changeCurrentPassword,getUserFollowers,getUserFollowing,getCurrentUser,updateAccountDetails} from "../controllers/user.controller.js"
+import {getUserProfile, updateUserAvatar,changeCurrentPassword,getUserFollowers,getUserFollowing,getCurrentUser,updateAccountDetails,getUserBookmarks,getUserLikes} from "../controllers/user.controller.js"
 
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js"
@@ -13,5 +13,7 @@ router.get("/me",verifyJWT,getCurrentUser)
 router.put("/update",verifyJWT,updateAccountDetails)
 router.get("/:username/followers",getUserFollowers)
 router.get("/:username/following",getUserFollowing)
+router.get("/my-likes", verifyJWT, getUserLikes)
+router.get("/my-bookmarks", verifyJWT, getUserBookmarks)
 
 export default router

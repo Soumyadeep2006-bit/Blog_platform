@@ -110,8 +110,8 @@ const createPost=asyncHandler(async(req,res)=>{
 
     const updatePost=asyncHandler(async(req,res)=>{
      const {postId}=req.params
-     const post=await Post.findById(postId)
 
+     const post=await Post.findById(postId) 
      if(post.author.toString()!==req.user._id.toString()){
         throw new ApiError(403,[],"You are not authorized to update this post")
      }

@@ -4,47 +4,50 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import User from '../models/user.model.js';
 import { deleteFromCloudinary, uploadOnCloudinary } from '../utils/cloudinary.js';
 import Comment from '../models/comment.model.js'
-import {ObjectId} from "mongoose"
+import mongoose from "mongoose"
 
 
 const addComment=asyncHandler(async(req,res)=>{
     const {postId}=req.params
-    const {content}=req.body
-    if (!content?.trim()) {
+    const {body}=req.body
+    if (!body?.trim()) {
   throw new ApiError(400, [], "Comment content is required")
 }
     
     const comment=await Comment.create({
-        content,
+        body:body,
         post:postId,
         author:req.user._id
     })
-    .populate("author","fullName avatar")
+
+     const populatedComment = await Comment.findById(comment._id)
+    .populate("author", "fullName avatar")
 
     return res
     .status(201)
-    .json(new ApiResponse(201,comment,"Comment added successfully"))
+    .json(new ApiResponse(201,populatedComment,"Comment added successfully"))
 
 })
 
 
 const addReply=asyncHandler(async(req,res)=>{
     const {commentId,postId}=req.params
-    const {replyContent}=req.body
-    if (!replyContent?.trim()) {
+    const {body}=req.body
+    if (!body?.trim()) {
   throw new ApiError(400, [], "Reply content is required")
 }
     const reply=await Comment.create({
-        content:replyContent,
+        body:body,
         post:postId,
         author:req.user._id,
         parent:commentId
     })
-    .populate("author","fullName avatar")
+    const populatedReply = await Comment.findById(reply._id)
+    .populate("author", "fullName avatar")
 
     return res
     .status(201)
-    .json(new ApiResponse(201,reply,"Reply added successfully"))
+    .json(new ApiResponse(201,populatedReply,"Reply added successfully"))
 })
 
 
@@ -67,6 +70,7 @@ const deleteComment=asyncHandler(async(req,res)=>{
 
 const getCommentsByPost=asyncHandler(async(req,res)=>{
     const {postId}=req.params
+    const postObjectId = new mongoose.Types.ObjectId(postId)
     const page=parseInt(req.query.page)||1
     const limit=parseInt(req.query.limit)||10
     const skip=(page-1)*limit
@@ -78,7 +82,7 @@ const getCommentsByPost=asyncHandler(async(req,res)=>{
 const totalPages = Math.ceil(totalComments / limit)
 
     const comments=  await Comment.aggregate([
-        {$match:{post: new ObjectId(req.params.postId),parent:null}},
+        {$match:{post: postObjectId,parent:null}},
         {$lookup:{
             from:"users",
             localField:"author",

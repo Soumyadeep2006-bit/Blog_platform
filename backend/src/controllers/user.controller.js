@@ -4,6 +4,8 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import User from "../models/user.model.js"
 import { deleteFromCloudinary } from "../utils/cloudinary.js"
 import Follow from "../models/follow.model.js"
+import Bookmark from "../models/bookmark.model.js"
+import Like from "../models/like.model.js"
 
 const getCurrentUser=asyncHandler(async(req,res)=>{
      return res
@@ -132,4 +134,51 @@ const getUserFollowing=asyncHandler(async(req,res)=>{
   return res.status(200).json(new ApiResponse(200,following,"User following list"))
 })
 
-export {changeCurrentPassword,updateAccountDetails,getCurrentUser,updateUserAvatar,getUserProfile,getUserFollowers,getUserFollowing}
+
+const getUserLikes=asyncHandler(async(req,res)=>{
+    const page=parseInt(req.query.page) || 1
+    const limit=parseInt(req.query.limit) || 10
+    const skip=(page-1)*limit
+
+    const likes=await Like.find({likedBy:req.user._id})
+    .populate("post")
+    .sort({createdAt:-1})
+     .skip(skip)
+     .limit(limit)
+
+     const likesCount=await Like.countDocuments({likedBy:req.user._id})
+     const totalPages=Math.ceil(likesCount/limit)
+
+     return res.status(200).json(
+  new ApiResponse(200, {
+    likes,
+    pagination: { currentPage: page, totalPages, likesCount }
+  }, "Liked posts fetched successfully")
+)
+})
+
+
+const getUserBookmarks=asyncHandler(async(req,res)=>{
+
+    const page=parseInt(req.query.page)||1
+    const limit=parseInt(req.query.limit)||10
+    const skip=(page-1)*limit
+
+    
+    const bookmarks=await Bookmark.find({bookmarkedBy:req.user._id})
+    .populate("post")
+    .sort({createdAt:-1})
+     .skip(skip)
+     .limit(limit)
+
+     const bookmarksCount=await Bookmark.countDocuments({bookmarkedBy:req.user._id})
+        const totalPages=Math.ceil(bookmarksCount/limit)
+        return res.status(200).json(
+            new ApiResponse(200,{
+                bookmarks,  
+                pagination:{currentPage:page,totalPages,bookmarksCount}
+            },"Bookmarked posts fetched successfully")
+        )
+})
+
+export {changeCurrentPassword,updateAccountDetails,getCurrentUser,updateUserAvatar,getUserProfile,getUserFollowers,getUserFollowing,getUserLikes,getUserBookmarks   }
