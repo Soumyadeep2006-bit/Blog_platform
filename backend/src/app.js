@@ -35,5 +35,10 @@ app.use("/api/v1/bookmarks",bookmarkRouter)
 import likeRouter from "./routes/like.routes.js"
 app.use("/api/v1/likes",likeRouter)
 
+import followRouter from "./routes/follow.routes.js"
+app.use("/api/v1/follows",followRouter)
+
+import adminRouter from "./routes/admin.routes.js"
+app.use("/api/v1/admin",adminRouter)
 
 export default app
