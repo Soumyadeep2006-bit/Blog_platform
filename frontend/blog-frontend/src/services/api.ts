@@ -11,10 +11,12 @@ withCredentials:true  //send cookies with requests
 
 //auth endpoints 
 export  const authAPI={
-    register:(data:{username: string; email: string; fullName: string; password: string })=>
-        apiClient.post<ApiResponse<User>>("/auth/register",data),
+   register:(data:FormData)=>
+    apiClient.post<ApiResponse<User>>("/auth/register",data,{
+      headers:{"Content-Type":"multipart/form-data"}
+    }),
 
-    login: (data: { email: string; password: string }) =>
+    login: (data: { email?: string; username?:string, password: string }) =>
     apiClient.post<ApiResponse<User>>("/auth/login", data),
 
      logout: () => apiClient.post("/auth/logout"),
@@ -102,8 +104,6 @@ export const likeAPI = {
   toggleLike: (postId: string) =>
     apiClient.post(`/likes/${postId}/toggle`),
 
-  getUserLikes: (page: number = 1) =>
-    apiClient.get(`/users/my-likes?page=${page}`),
 }
 
 export const bookmarkAPI = {
