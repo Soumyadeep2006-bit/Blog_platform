@@ -36,7 +36,7 @@ export const AuthProvider=({children}:{children:ReactNode})=>{
             setError(null)
         } catch(err){
             setUser(null)
-            setError(null)//not an error if not logged in \
+            setError(null)//not an error if not logged in 
 
         }finally{
             setIsLoading(false)

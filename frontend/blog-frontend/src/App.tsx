@@ -1,14 +1,21 @@
 import { useState } from 'react'
+import {createBrowserRouter,RouterProvider} from "react-router-dom"
 
-import './App.css'
+import Login from './pages/Login.tsx'
+import Register from './pages/Register.tsx'
+import Home from './pages/Home.tsx'
+
+const router = createBrowserRouter([
+  { path: "/", element: <Home /> },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+])
 
 function App() {
  
 
   return (
-    <>
-    <div>Blog Platform</div>
-    </>
+  <RouterProvider router={router}/>
   )
 }
 

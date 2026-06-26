@@ -1,0 +1,125 @@
+import {useState} from "react"
+import {useNavigate,Link} from "react-router-dom"
+import {useAuth} from "../context/AuthContext.tsx"
+
+
+function Login() {
+    //form state , without state the value disappears after the user types
+    const [email,setEmail]=useState("")
+    const [password,setPassword]=useState("")
+
+    // Auth context
+  const { login, isLoading, error } = useAuth()    
+
+  const navigate=useNavigate()
+
+  //handle form submission
+  const handleSubmit=async (e:React.SubmitEvent<HTMLFormElement>)=>{
+    e.preventDefault()
+  
+
+  try{
+    await login(email,password)
+    navigate("/")
+  }catch(err){
+    //error already in context ,component will show it 
+  }
+
+}
+  
+
+ return (
+ <div style={{padding:"20px"}} className="min-h-screen bg-slate-200 flex items-center justify-center px-4 ">
+  {/*Card */}
+  <div className="w-full max-w-xl rounded-2xl bg-white shadow-xl ">
+    {/*Content */}
+
+    <div  className="p-6 sm:p-8 md:p-10">
+      {/*Header*/}
+      <div className="mb-10">
+           <h1 className="text-center text-2xl sm:text-3xl font-bold text-gray-900">
+            Sign in to your account
+          </h1>
+
+          <p className="mt-3 text-center text-gray-500">
+            Welcome back! Please sign in to continue.
+          </p>
+      </div>
+
+      {/*Form*/}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+         {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+            {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Email Address
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 transition duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
+            />
+          </div>
+              {/* Password */}
+          <div>
+            <label
+              htmlFor="password"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
+
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your password"
+              required
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 transition duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
+            />
+          </div>
+           {/* Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full rounded-lg bg-red-500 px-4 py-3 font-semibold text-white transition duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 hover:z-10 hover:-translate-y-1 hover:scale-110 active:z-10 active:-translate-y-1 active:scale-110"
+          >
+            {isLoading ? "Signing in..." : "Sign In"}
+          </button>
+
+      </form>
+
+  {/* Footer */}
+        <div className="mt-10 border-t border-gray-200 pt-6">
+          <p className="text-center text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="font-semibold text-red-600 transition hover:text-red-700"
+            >
+              Sign Up
+            </Link>
+          </p>
+        </div>
+    </div>
+  </div>
+ </div>
+)
+}
+  
+
+
+export default Login
