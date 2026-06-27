@@ -107,7 +107,7 @@ const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
                 Full Name
               </label>
               <input
-                id="fullName"
+                id="fullName"                                               
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
