@@ -8,6 +8,7 @@ import Post from "../models/post.model.js"
 
 
 const createPost=asyncHandler(async(req,res)=>{
+  
     const {title,body,category,tags,status,scheduledAt}=req.body
     
     if(!title||!body)
@@ -27,6 +28,7 @@ const createPost=asyncHandler(async(req,res)=>{
         if(!uploadedImage?.url){
             throw new ApiError(400,[],"Cover image upload failed")
         }
+
         coverImage=uploadedImage.url
 
     }
