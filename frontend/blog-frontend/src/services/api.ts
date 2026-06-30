@@ -102,13 +102,13 @@ export const userAPI = {
 //like and bookmark endpoints 
 export const likeAPI = {
   toggleLike: (postId: string) =>
-    apiClient.post(`/likes/${postId}/toggle`),
+    apiClient.post(`/likes/${postId}/toggle-like`),
 
 }
 
 export const bookmarkAPI = {
   toggleBookmark: (postId: string) =>
-    apiClient.post(`/bookmarks/${postId}/toggle`),
+    apiClient.post(`/bookmarks/${postId}/toggle-bookmark`),
 }
 
 //follow endpoints 

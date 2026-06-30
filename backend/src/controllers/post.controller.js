@@ -45,6 +45,7 @@ const createPost=asyncHandler(async(req,res)=>{
         coverImage:coverImage,
         author:req.user._id
         })
+        await post.populate("author")
 
         return res.status(201).json(new ApiResponse(201,post,"Post created successfully"))
 
@@ -53,6 +54,7 @@ const createPost=asyncHandler(async(req,res)=>{
     const getPost=asyncHandler(async(req,res)=>{
     const {slug}=req.params
     const post=await Post.findOne({slug})
+    .populate("author")
     if(!post){
     throw new ApiError(404,[],"Post not found")
     }
@@ -138,6 +140,8 @@ const createPost=asyncHandler(async(req,res)=>{
      if(req.file && oldCoverImage){
         await deleteFromCloudinary(oldCoverImage)
      }
+     await post.populate("author")  
+await post.populate("category")
 
      return res.status(200).json(new ApiResponse(200,updatedPost,"Post updated successfully"))
 

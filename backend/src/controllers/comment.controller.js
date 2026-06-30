@@ -89,6 +89,7 @@ const totalPages = Math.ceil(totalComments / limit)
             foreignField:"_id",
             as:"author"
         }},
+        {$unwind:"$author"},
         {$lookup:{
             from:"comments",
             localField:"_id",
