@@ -7,12 +7,14 @@ interface CommentThreadProps {
   comment: Comment
   postId: string
   onReplyAdded: () => void
+  isTopLevel?:boolean
 }
 
 export default function CommentThread({ 
   comment, 
   postId, 
-  onReplyAdded 
+  onReplyAdded ,
+  isTopLevel=true
 }: CommentThreadProps) {
   const { isAuthenticated, user } = useAuth()
   const [showReplyForm, setShowReplyForm] = useState(false)
@@ -54,9 +56,9 @@ export default function CommentThread({
   const replyCount = comment.replies?.length || 0
 
   return (
-    <div className="mb-6">
+    <div className={isTopLevel ? "mb-6 border-l-4 border-red-500" : "mb-6"}>
       {/* Main Comment */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-4 rounded-lg shadow">
         <div className="flex items-start gap-4">
           <img
             src={comment.author.avatar || 'https://placehold.co/600x400/grey/white?text=no+image'}
@@ -78,7 +80,7 @@ export default function CommentThread({
             </p>
 
             {/* Comment Body with mention */}
-            <p className="mt-3 text-gray-700 break-words">
+            <p className="mt-2 text-gray-700 break-words">
               {comment.replyingTo && (
                 <span className="text-blue-600 font-medium">
                   @{comment.replyingTo.username}{' '}
@@ -88,7 +90,7 @@ export default function CommentThread({
             </p>
 
             {/* Action Buttons */}
-            <div className="flex gap-4 mt-4 flex-wrap">
+            <div className="flex gap-4 mt-3 flex-wrap">
               {isAuthenticated && (
                 <button
                   onClick={() => setShowReplyForm(!showReplyForm)}
@@ -156,6 +158,7 @@ export default function CommentThread({
               comment={reply}
               postId={postId}
               onReplyAdded={onReplyAdded}
+              isTopLevel={false}
             />
           ))}
         </div>

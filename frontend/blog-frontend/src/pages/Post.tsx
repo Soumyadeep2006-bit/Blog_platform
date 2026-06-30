@@ -250,7 +250,7 @@ if (error || !post) {
 ) : comments.length === 0 ? (
   <p className="text-center text-gray-600 py-8">No comments yet. Be the first!</p>
 ) : (
-  <div className="space-y-6">
+  <div className="space-y-4">
     {comments.map((comment) => (
       <CommentThread 
         key={comment._id} 
