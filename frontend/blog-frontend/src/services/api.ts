@@ -58,11 +58,16 @@ export const postAPI={
   addComment: (postId: string, data: { body: string }) =>
     apiClient.post<ApiResponse<Comment>>(`/comments/${postId}/add-comment`, data),
 
-  getComments: (postId: string, page: number = 1, limit: number = 10) =>
+  getCommentsByPost: (postId: string, page: number = 1, limit: number = 10) =>
     apiClient.get<ApiResponse<any>>(`/comments/${postId}/comments?page=${page}&limit=${limit}`),
 
   deleteComment: (commentId: string) =>
     apiClient.delete(`/comments/${commentId}`),
+
+  addReply:(postId:string,commentId:string,data:{body:string})=>
+    apiClient.post<ApiResponse<Comment>>(`/comments/${postId}/${commentId}/add-reply`,data)
+
+  
 }
 
 

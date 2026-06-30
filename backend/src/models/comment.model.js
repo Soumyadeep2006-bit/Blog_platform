@@ -19,6 +19,11 @@ const commentSchema=new mongoose.Schema({
         type:Schema.Types.ObjectId,
         ref:"Comment",
         default:null
+    },
+    replyingTo:{
+        type:Schema.Types.ObjectId,
+        ref:"User",
+       default:null
     }
 },{timestamps:true})
 

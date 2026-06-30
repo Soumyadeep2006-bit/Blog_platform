@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar.tsx"
 import { postAPI, commentAPI, likeAPI, bookmarkAPI } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { Post as PostType, Comment } from '../types'
+import CommentThread from "../components/CommentThread.tsx"
 
 
 function Post() {
@@ -42,7 +43,7 @@ useEffect(()=>{
     if(!post?._id) return //don't fetch if no comments yet 
     try{
       setIsLoadingComments(true)
-      const response =await commentAPI.getComments(post._id,1,50)
+      const response =await commentAPI.getCommentsByPost(post._id,1,50)
       setComments(response.data.data.comments||[])
     } catch(err){
       console.log("Failed to load comments")
@@ -64,7 +65,7 @@ try{
   setCommentBody("")//clear Input
 
   //refreshComments List
-  const response=await commentAPI.getComments(post._id,1,50)
+  const response=await commentAPI.getCommentsByPost(post._id,1,50)
   setComments(response.data.data.comments||[])
 }catch(err){
   console.log("Failed to add comment ")
@@ -242,42 +243,32 @@ if (error || !post) {
           )}
 
           {/* Comments List */}
-          {isLoadingComments ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-            </div>
-          ) : comments.length === 0 ? (
-            <p className="text-center text-gray-600 py-8">No comments yet. Be the first!</p>
-          ) : (
-            <div className="space-y-6">
-              {comments.map((comment) => (
-                <div key={comment._id} className="bg-white p-6 rounded-lg shadow">
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={comment.author.avatar || 'https://placehold.co/600x400/grey/white?text=no+image'}
-                      alt={comment.author.fullName}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-gray-900">
-                          {comment.author.fullName}
-                        </p>
-                        {comment.author.isVerified && (
-                          <span className="text-blue-600">✓</span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        {new Date(comment.createdAt).toLocaleDateString()}
-                      </p>
-                      <p className="mt-2 text-gray-700">{comment.body}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+{isLoadingComments ? (
+  <div className="text-center py-8">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+  </div>
+) : comments.length === 0 ? (
+  <p className="text-center text-gray-600 py-8">No comments yet. Be the first!</p>
+) : (
+  <div className="space-y-6">
+    {comments.map((comment) => (
+      <CommentThread 
+        key={comment._id} 
+        comment={comment} 
+        postId={post._id}
+        onReplyAdded={() => {
+          const refetch = async () => {
+            const response = await commentAPI.getCommentsByPost(post._id, 1, 50)
+            setComments(response.data.data.comments || [])
+          }
+          refetch()
+        }}
+      />
+    ))}
+  </div>
+)}
+  
+    </div>
       </article>
     </div>
   )

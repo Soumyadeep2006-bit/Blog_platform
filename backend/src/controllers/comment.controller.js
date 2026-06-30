@@ -36,14 +36,20 @@ const addReply=asyncHandler(async(req,res)=>{
     if (!body?.trim()) {
   throw new ApiError(400, [], "Reply content is required")
 }
+
+// Get parent comment to know who they're replying to
+  const parentComment = await Comment.findById(commentId)
+
     const reply=await Comment.create({
         body:body,
         post:postId,
         author:req.user._id,
-        parent:commentId
+        parent:commentId,
+        replyingTo: parentComment.author
     })
     const populatedReply = await Comment.findById(reply._id)
-    .populate("author", "fullName avatar")
+    .populate("author", "fullName avatar username")
+    .populate("replyingTo","username fullname avatar")
 
     return res
     .status(201)
@@ -68,45 +74,52 @@ const deleteComment=asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200,null,"Comment and its replies deleted successfully"))
 })
 
-const getCommentsByPost=asyncHandler(async(req,res)=>{
-    const {postId}=req.params
-    const postObjectId = new mongoose.Types.ObjectId(postId)
-    const page=parseInt(req.query.page)||1
-    const limit=parseInt(req.query.limit)||10
-    const skip=(page-1)*limit
+const getCommentsByPost = asyncHandler(async (req, res) => {
+  const { postId } = req.params
+  const page = parseInt(req.query.page) || 1
+  const limit = parseInt(req.query.limit) || 10
+  const skip = (page - 1) * limit
 
-    const totalComments = await Comment.countDocuments({
-  post: postId,
-  parent: null
+  // Fetch ALL comments for this post (don't limit yet)
+  const allComments = await Comment.find({ post: postId })
+    .populate("author", "fullName avatar isVerified username") 
+    .populate("replyingTo", "username fullName avatar")
+    .sort({ createdAt: -1 })
+
+  // Organize into parent-child tree
+  const commentMap = new Map()
+  const rootComments = []
+
+  allComments.forEach((comment) => {
+    commentMap.set(comment._id.toString(), {
+      ...comment.toObject(),
+      replies: []
+    })
+  })
+
+  allComments.forEach((comment) => {
+    if (comment.parent) {
+      const parent = commentMap.get(comment.parent.toString())
+      if (parent) {
+        parent.replies.push(commentMap.get(comment._id.toString()))
+      }
+    } else {
+      rootComments.push(commentMap.get(comment._id.toString()))
+    }
+  })
+
+  // Paginate root comments
+  const totalComments = rootComments.length
+  const totalPages = Math.ceil(totalComments / limit)
+  const paginatedComments = rootComments.slice(skip, skip + limit)
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { comments: paginatedComments, pagination: { currentPage: page, totalPages, totalComments } },
+      "Comments fetched successfully"
+    )
+  )
 })
-const totalPages = Math.ceil(totalComments / limit)
-
-    const comments=  await Comment.aggregate([
-        {$match:{post: postObjectId,parent:null}},
-        {$lookup:{
-            from:"users",
-            localField:"author",
-            foreignField:"_id",
-            as:"author"
-        }},
-        {$unwind:"$author"},
-        {$lookup:{
-            from:"comments",
-            localField:"_id",
-            foreignField:"parent",
-            as:"replies"
-        }},
-        {$sort:{createdAt:-1}},
-        { $skip: skip },
-        { $limit: limit }
-    ])
-
-    return res
-    .status(200)
-    
-    .json(new ApiResponse(200,{comments,pagination: { currentPage: page, totalPages, totalComments }}
-  ,"Comments fetched successfully"))
-})
-
 
 export {addComment,addReply,deleteComment,getCommentsByPost}

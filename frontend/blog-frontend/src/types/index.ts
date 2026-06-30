@@ -33,6 +33,7 @@ export interface Comment {
   post: string
   author: User
   parent: string | null
+  replyingTo?: User
   replies?: Comment[]
   createdAt: string
 }
