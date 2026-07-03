@@ -15,8 +15,6 @@ const getCurrentUser=asyncHandler(async(req,res)=>{
 
 const changeCurrentPassword=asyncHandler(async(req,res)=>{
 
-    console.log("hit")
-  console.log("body:", req.body)
     const {oldPassword,newPassword}=req.body;
 
     const user=await User.findById(req.user?._id)
