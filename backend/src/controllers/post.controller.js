@@ -5,6 +5,7 @@ import User from '../models/user.model.js';
 import { deleteFromCloudinary, uploadOnCloudinary } from '../utils/cloudinary.js';
 import slugify from "slugify"
 import Post from "../models/post.model.js"
+import Like from '../models/like.model.js';
 
 
 const createPost=asyncHandler(async(req,res)=>{
@@ -58,7 +59,16 @@ const createPost=asyncHandler(async(req,res)=>{
     if(!post){
     throw new ApiError(404,[],"Post not found")
     }
-    return res.status(200).json(new ApiResponse(200,post,"Post fetched successfully"))  
+
+     // Fetch likes separately
+  const likes = await Like.find({ post: post._id })
+  
+  // Add likes to post object
+  const postWithLikes = {
+    ...post.toObject(),
+    likes: likes
+  }
+    return res.status(200).json(new ApiResponse(200,postWithLikes,"Post fetched successfully"))  
 
     })
 
@@ -75,12 +85,21 @@ const createPost=asyncHandler(async(req,res)=>{
          .skip(skip)
             .limit(limit)
 
+
+// Fetch likes for all posts
+const postsWithLikes = await Promise.all(
+  posts.map(async (post) => {
+    const likes = await Like.find({ post: post._id })
+    return { ...post.toObject(), likes }
+  })
+)
+
     const totalPosts=await Post.countDocuments({status:"published"})
     const totalPages=Math.ceil(totalPosts/limit)
 
     return res
     .status(200)
-    .json(new ApiResponse(200,{posts,pagination:{ currentPage: page,
+    .json(new ApiResponse(200,{posts:postsWithLikes,pagination:{ currentPage: page,
         totalPages,
         totalPosts,
         postsPerPage: limit
@@ -106,10 +125,20 @@ const createPost=asyncHandler(async(req,res)=>{
          .skip(skip)
             .limit(limit)
 
+
+
+// Fetch likes for all posts
+const postsWithLikes = await Promise.all(
+  postsByUser.map(async (post) => {
+    const likes = await Like.find({ post: post._id })
+    return { ...post.toObject(), likes }
+  })
+)
+
         const totalPostsByUser=await Post.countDocuments({author:user._id,status:"published"})
         const totalPagesByUser=Math.ceil(totalPostsByUser/limit)
         
-        return res.status(200).json(new ApiResponse(200,{posts:postsByUser,pagination:{currentPage:page,totalPages:totalPagesByUser,totalPosts:totalPostsByUser,postsPerPage:limit}},"Posts fetched successfully"))
+        return res.status(200).json(new ApiResponse(200,{posts:postsWithLikes,pagination:{currentPage:page,totalPages:totalPagesByUser,totalPosts:totalPostsByUser,postsPerPage:limit}},"Posts fetched successfully"))
     })
 
     const updatePost=asyncHandler(async(req,res)=>{

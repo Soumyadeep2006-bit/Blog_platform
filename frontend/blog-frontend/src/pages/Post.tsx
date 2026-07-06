@@ -26,6 +26,14 @@ try{
   setIsLoadingPost(true)
   const response =await postAPI.getPost(slug!)
   setPost(response.data.data)
+
+     if (user && response.data.data.likes) {
+        const userLiked = response.data.data.likes.some(
+          (like: any) => like.likedBy === user._id
+        )
+        setIsLiked(userLiked)
+      }
+      
   setError(null)
 }catch(err:any){
   setError(err.response?.data?.message||"failed to load post")

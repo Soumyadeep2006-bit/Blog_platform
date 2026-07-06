@@ -5,6 +5,7 @@ import { useState } from 'react'
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+ 
 
   const handleLogout = async () => {
     try {
@@ -34,6 +35,7 @@ export default function Navbar() {
                 <Link to="/dashboard" className="text-gray-700 hover:text-red-600 font-medium">
                   Dashboard
                 </Link>
+                
                 <Link to={`/profile/${user?.username}`} className="text-gray-700 hover:text-red-600 font-medium">
                   Profile
                 </Link>

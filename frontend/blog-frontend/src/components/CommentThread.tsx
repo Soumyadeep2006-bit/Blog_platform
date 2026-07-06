@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { commentAPI } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { Comment } from '../types'
+import { Link } from 'react-router-dom'
 
 interface CommentThreadProps {
   comment: Comment
@@ -68,9 +69,12 @@ export default function CommentThread({
           <div className="flex-1 min-w-0">
             {/* Author Info */}
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="font-semibold text-gray-900">
-                {comment.author.fullName}
-              </p>
+             <Link 
+  to={`/profile/${comment.author.username}`}
+  className="font-semibold text-gray-900 hover:text-red-600"
+>
+  {comment.author.fullName}
+</Link>
               {comment.author.isVerified && (
                 <span className="text-blue-600">✓</span>
               )}

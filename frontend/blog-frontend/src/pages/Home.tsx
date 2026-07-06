@@ -4,6 +4,7 @@ import {Link} from "react-router-dom"
 import { postAPI } from "../services/api"
 import {Post} from "../types/index"
 
+
 function Home() {
   const [posts,setPosts]=useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -75,7 +76,9 @@ function Home() {
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{post.author.fullName}</p>
+                     <Link to={`/profile/${post.author.username}`} className="font-semibold text-gray-900 hover:text-red-600">
+                        {post.author.fullName}
+                           </Link>
                         <p className="text-sm text-gray-500">
                           {new Date(post.createdAt).toLocaleDateString()}
                         </p>
@@ -118,6 +121,10 @@ function Home() {
                       to={`/post/${post.slug}`}
                       className="text-red-600 font-semibold hover:text-red-700 transition"
                     >
+                      <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+  <p>{new Date(post.createdAt).toLocaleDateString()}</p>
+  <p>❤️ {Array.isArray(post.likes) ? post.likes.length : 0} likes</p>
+</div>
                       Read More →
                     </Link>
                   </div>

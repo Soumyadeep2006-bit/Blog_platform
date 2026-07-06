@@ -47,7 +47,8 @@ export const AuthProvider=({children}:{children:ReactNode})=>{
         try{
             setIsLoading(true)
             const response=await authAPI.login({email:emailorusername,password})
-            setUser(response.data.data)
+            const userData = (response.data.data as any).user as User
+            setUser(userData)
             setError(null)
 
         }catch (err:any){
@@ -71,7 +72,8 @@ export const AuthProvider=({children}:{children:ReactNode})=>{
     }
             setIsLoading(true)
             const response=await authAPI.register(formData)
-            setUser(response.data.data)
+            const userData = (response.data.data as any).user as User
+    setUser(userData)
             setError(null)
         }catch(err:any){
             setError(err.response?.data?.message||"Registration Failed")

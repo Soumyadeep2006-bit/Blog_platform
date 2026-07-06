@@ -179,4 +179,26 @@ const getUserBookmarks=asyncHandler(async(req,res)=>{
         )
 })
 
-export {changeCurrentPassword,updateAccountDetails,getCurrentUser,updateUserAvatar,getUserProfile,getUserFollowers,getUserFollowing,getUserLikes,getUserBookmarks   }
+const getAllUsers = asyncHandler(async(req, res) => {
+  const page = parseInt(req.query.page) || 1
+  const limit = parseInt(req.query.limit) || 10
+  const skip = (page - 1) * limit
+
+  const users = await User.find()
+    .select('-password')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+
+  const totalUsers = await User.countDocuments()
+  const totalPages = Math.ceil(totalUsers / limit)
+
+  return res.status(200).json(new ApiResponse(200, {
+    users,
+    pagination: { currentPage: page, totalPages, totalUsers }
+  }, "Users fetched successfully"))
+})
+
+
+
+export {changeCurrentPassword,updateAccountDetails,getCurrentUser,updateUserAvatar,getUserProfile,getUserFollowers,getUserFollowing,getUserLikes,getUserBookmarks ,getAllUsers  }

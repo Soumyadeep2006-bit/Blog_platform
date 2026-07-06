@@ -30,10 +30,10 @@ function CreatePost() {
   const [, setEditorUpdate] = useState(0)
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated&&!isLoading) {
       navigate('/login')
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate,isLoading])
 
   const lowlight = createLowlight(common)
 

@@ -1,0 +1,207 @@
+import { useEffect, useState } from 'react'
+import { useNavigate ,Link} from 'react-router-dom'
+import Navbar from '../components/Navbar'
+import { postAPI, bookmarkAPI, likeAPI ,userAPI} from '../services/api'
+import { useAuth } from '../context/AuthContext'
+import { Post } from '../types'
+
+export default function Dashboard() {
+  const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuth()
+  const [activeTab, setActiveTab] = useState<'posts' | 'bookmarks' | 'likes'>('posts')
+  const [myPosts, setMyPosts] = useState<Post[]>([])
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Post[]>([])
+  const [likedPosts, setLikedPosts] = useState<Post[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!isAuthenticated&&!isLoading) {
+      navigate('/login')
+    }
+  }, [isAuthenticated, navigate,isLoading])
+
+
+  useEffect(() => {
+  const fetchInitialCounts = async () => {
+    try {
+      const res = await userAPI.getUserLikes()
+      const likeData = res.data.data.likes || []
+      setLikedPosts(likeData.map((like: any) => like.post) || [])
+    } catch (err) {
+      console.error('Failed to fetch initial likes count')
+    }
+  }
+
+  fetchInitialCounts()
+}, [])
+
+  // Fetch functions
+  const fetchPosts = async () => {
+    try {
+      setIsLoading(true)
+      const res = await postAPI.getPostsByUser(user?.username!)
+      setMyPosts(Array.isArray(res.data.data) ? res.data.data : res.data.data.posts || [])
+      setIsLoading(false)
+    } catch (err) {
+      console.error('Failed to fetch posts')
+      setIsLoading(false)
+    }
+  }
+
+  const fetchBookmarks = async () => {
+    try {
+      setIsLoading(true)
+      const res = await userAPI.getUserBookmarks()
+      console.log('Bookmarks response:', res.data.data)
+      
+      const bookmarkData = res.data.data.bookmarks || []
+      const freshPosts = await Promise.all(
+        bookmarkData.map((bookmark: any) => postAPI.getPost(bookmark.post.slug))
+      )
+      setBookmarkedPosts(freshPosts.map(p => p.data.data))
+      setIsLoading(false)
+    } catch (err) {
+      console.error('Failed to fetch bookmarks')
+      setIsLoading(false)
+    }
+  }
+
+  const fetchLikes = async () => {
+    try {
+      setIsLoading(true)
+      const res = await userAPI.getUserLikes()
+      console.log('Likes response:', res.data.data)
+      
+      const likeData = res.data.data.likes || []
+      const freshPosts = await Promise.all(
+        likeData.map((like: any) => postAPI.getPost(like.post.slug))
+      )
+      setLikedPosts(freshPosts.map(p => p.data.data))
+      setIsLoading(false)
+    } catch (err) {
+      console.error('Failed to fetch likes')
+      setIsLoading(false)
+    }
+  }
+
+  // On tab change
+  useEffect(() => {
+    if (activeTab === 'posts') {
+      fetchPosts()
+    } else if (activeTab === 'bookmarks') {
+      fetchBookmarks()
+    } else if (activeTab === 'likes') {
+      fetchLikes()
+    }
+  }, [activeTab, user?.username])
+
+  // On window focus
+  useEffect(() => {
+    const handleFocus = () => {
+      if (activeTab === 'likes') {
+        fetchLikes()
+      } else if (activeTab === 'bookmarks') {
+        fetchBookmarks()
+      }
+    }
+    
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [activeTab])
+
+  if (!isAuthenticated) {
+    return null
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex justify-center items-center py-32">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        </div>
+      </div>
+    )
+  }
+
+  const posts = activeTab === 'posts' ? myPosts : activeTab === 'bookmarks' ? bookmarkedPosts : likedPosts
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">Dashboard</h1>
+
+        {/* Tabs */}
+        <div className="flex gap-4 mb-8 border-b border-gray-300">
+          <button
+            onClick={() => setActiveTab('posts')}
+            className={`px-4 py-3 font-medium border-b-2 transition ${
+              activeTab === 'posts'
+                ? 'border-red-600 text-red-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            My Posts ({myPosts.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('bookmarks')}
+            className={`px-4 py-3 font-medium border-b-2 transition ${
+              activeTab === 'bookmarks'
+                ? 'border-red-600 text-red-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Bookmarks ({bookmarkedPosts.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('likes')}
+            className={`px-4 py-3 font-medium border-b-2 transition ${
+              activeTab === 'likes'
+                ? 'border-red-600 text-red-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Likes ({likedPosts.length})
+          </button>
+        </div>
+
+        {/* Posts Grid */}
+        {posts.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-gray-600 mb-4">
+              {activeTab === 'posts' && "You haven't created any posts yet"}
+              {activeTab === 'bookmarks' && "You haven't bookmarked any posts"}
+              {activeTab === 'likes' && "You haven't liked any posts"}
+            </p>
+            {activeTab === 'posts' && (
+              <Link to="/create" className="text-red-600 hover:text-red-700 font-medium">
+                Create your first post →
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {posts.map((post, index) => (
+              <Link
+                key={index}
+                to={`/post/${post.slug}`}
+                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border-l-4 border-red-600"
+              >
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                 {post.body?.replace(/<[^>]*>/g, '') || 'No content'}
+                </p>
+                <div className="flex justify-between items-center text-sm text-gray-500">
+                  <p>{new Date(post.createdAt).toLocaleDateString()}</p>
+                  <p>❤️ {post.likes?.length || 0} likes</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
