@@ -26,6 +26,12 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Menu */}
+
+          {isAuthenticated && user?.role === 'admin' && (
+  <Link to="/admin" className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium">
+    Admin
+  </Link>
+)}
           <div className="hidden md:flex items-center gap-6">
             {isAuthenticated ? (
               <>

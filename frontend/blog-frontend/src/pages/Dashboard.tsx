@@ -8,10 +8,11 @@ import { Post } from '../types'
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
-  const [activeTab, setActiveTab] = useState<'posts' | 'bookmarks' | 'likes'>('posts')
+  const [activeTab, setActiveTab] = useState<'posts' | 'bookmarks' | 'likes' | 'scheduled'>('posts')
   const [myPosts, setMyPosts] = useState<Post[]>([])
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Post[]>([])
   const [likedPosts, setLikedPosts] = useState<Post[]>([])
+  const [scheduledPosts, setScheduledPosts] = useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -20,30 +21,29 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, navigate,isLoading])
 
-
-  useEffect(() => {
-  const fetchInitialCounts = async () => {
-    try {
-      const res = await userAPI.getUserLikes()
-      const likeData = res.data.data.likes || []
-      setLikedPosts(likeData.map((like: any) => like.post) || [])
-    } catch (err) {
-      console.error('Failed to fetch initial likes count')
-    }
-  }
-
-  fetchInitialCounts()
-}, [])
-
   // Fetch functions
   const fetchPosts = async () => {
     try {
       setIsLoading(true)
       const res = await postAPI.getPostsByUser(user?.username!)
-      setMyPosts(Array.isArray(res.data.data) ? res.data.data : res.data.data.posts || [])
+      const published = Array.isArray(res.data.data) ? res.data.data : res.data.data.posts || []
+      setMyPosts(published.filter((p: any) => p.status === 'published'))
       setIsLoading(false)
     } catch (err) {
       console.error('Failed to fetch posts')
+      setIsLoading(false)
+    }
+  }
+
+  const fetchScheduledPosts = async () => {
+    try {
+      setIsLoading(true)
+      const res = await postAPI.getPostsByUser(user?.username!)
+      const scheduled = Array.isArray(res.data.data) ? res.data.data : res.data.data.posts || []
+      setScheduledPosts(scheduled.filter((p: any) => p.status === 'scheduled'))
+      setIsLoading(false)
+    } catch (err) {
+      console.error('Failed to fetch scheduled posts')
       setIsLoading(false)
     }
   }
@@ -84,10 +84,27 @@ export default function Dashboard() {
     }
   }
 
+  // On initial mount, fetch likes count
+  useEffect(() => {
+    const fetchInitialCounts = async () => {
+      try {
+        const res = await userAPI.getUserLikes()
+        const likeData = res.data.data.likes || []
+        setLikedPosts(likeData.map((like: any) => like.post) || [])
+      } catch (err) {
+        console.error('Failed to fetch initial likes count')
+      }
+    }
+
+    fetchInitialCounts()
+  }, [])
+
   // On tab change
   useEffect(() => {
     if (activeTab === 'posts') {
       fetchPosts()
+    } else if (activeTab === 'scheduled') {
+      fetchScheduledPosts()
     } else if (activeTab === 'bookmarks') {
       fetchBookmarks()
     } else if (activeTab === 'likes') {
@@ -124,7 +141,7 @@ export default function Dashboard() {
     )
   }
 
-  const posts = activeTab === 'posts' ? myPosts : activeTab === 'bookmarks' ? bookmarkedPosts : likedPosts
+  const posts = activeTab === 'posts' ? myPosts : activeTab === 'scheduled' ? scheduledPosts : activeTab === 'bookmarks' ? bookmarkedPosts : likedPosts
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -144,6 +161,16 @@ export default function Dashboard() {
             }`}
           >
             My Posts ({myPosts.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('scheduled')}
+            className={`px-4 py-3 font-medium border-b-2 transition ${
+              activeTab === 'scheduled'
+                ? 'border-red-600 text-red-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Scheduled ({scheduledPosts.length})
           </button>
           <button
             onClick={() => setActiveTab('bookmarks')}
@@ -172,6 +199,7 @@ export default function Dashboard() {
           <div className="text-center py-16">
             <p className="text-gray-600 mb-4">
               {activeTab === 'posts' && "You haven't created any posts yet"}
+              {activeTab === 'scheduled' && "You haven't scheduled any posts"}
               {activeTab === 'bookmarks' && "You haven't bookmarked any posts"}
               {activeTab === 'likes' && "You haven't liked any posts"}
             </p>

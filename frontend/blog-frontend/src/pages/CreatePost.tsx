@@ -197,10 +197,10 @@ function CreatePost() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 ">
               Cover Image
             </label>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 ">
               {coverImagePreview && (
                 <img
                   src={coverImagePreview}
@@ -212,7 +212,7 @@ function CreatePost() {
                 type="file"
                 accept="image/*"
                 onChange={handleCoverImageChange}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-red-500 file:text-white hover:file:bg-red-700 "
               />
             </div>
           </div>
@@ -315,6 +315,7 @@ function CreatePost() {
               <option value="Technology">Technology</option>
               <option value="Travel">Travel</option>
               <option value="Food">Food</option>
+              <option value="Sport">Sport</option>
               <option value="Lifestyle">Lifestyle</option>
               <option value="Business">Business</option>
             </select>

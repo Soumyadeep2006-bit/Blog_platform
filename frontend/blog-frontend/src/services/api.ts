@@ -101,6 +101,8 @@ export const userAPI = {
 
   getUserFollowing: (username: string, page: number = 1, limit: number = 10) =>
     apiClient.get<ApiResponse<any>>(`/users/${username}/following?page=${page}&limit=${limit}`),
+
+   getAllUsers: (page:number=1, limit:number=10) => apiClient.get(`/users?page=${page}&limit=${limit}`),
 }
 
 
@@ -120,6 +122,14 @@ export const bookmarkAPI = {
 export const followAPI = {
   toggleFollow: (userId: string) =>
     apiClient.post(`/follows/${userId}/toggle-follow`),
+}
+
+
+export const adminAPI = {
+  deletePost: (postId:string) => apiClient.delete(`/admin/delete-post/${postId}`),
+  deleteComment: (commentId:string) => apiClient.delete(`/admin/delete-comment/${commentId}`),
+  banUser: (userId:string) => apiClient.post(`/admin/ban-user/${userId}`),
+  verifyUser: (userId:string) => apiClient.post(`/admin/verify-user/${userId}`),
 }
 
 export default apiClient

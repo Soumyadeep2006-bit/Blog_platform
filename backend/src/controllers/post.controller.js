@@ -6,6 +6,7 @@ import { deleteFromCloudinary, uploadOnCloudinary } from '../utils/cloudinary.js
 import slugify from "slugify"
 import Post from "../models/post.model.js"
 import Like from '../models/like.model.js';
+import Category from '../models/category.model.js'
 
 
 const createPost=asyncHandler(async(req,res)=>{

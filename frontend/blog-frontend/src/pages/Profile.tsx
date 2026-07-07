@@ -18,21 +18,30 @@ export default function Profile() {
   const [isFollowing, setIsFollowing] = useState(false)
 
  useEffect(() => {
-   if (!username) return 
+  if (!username) return 
   const fetchData = async () => {
     try {
       const [userRes, postsRes, followersRes, followingRes] = await Promise.all([
         userAPI.getUserProfile(username!),
         postAPI.getPostsByUser(username!),
-        userAPI.getUserFollowers(username!),
-        userAPI.getUserFollowing(username!),
+        userAPI.getUserFollowers(username!, 1, 10),
+        userAPI.getUserFollowing(username!, 1, 10),
       ])
 
-      setUser(userRes.data.data)
-      console.log('Posts response:', postsRes.data.data)
+      const profileUser = userRes.data.data
+      setUser(profileUser)
+      
+      // Check if current user is in the followers of this profile user
+     if (currentUser && followersRes.data.data) {
+  const alreadyFollowing = followersRes.data.data.some(
+    (follower: any) => follower.followedBy._id === currentUser._id
+  )
+  setIsFollowing(alreadyFollowing)
+}
+      
       setPosts(postsRes.data.data.posts || [])
-      setFollowers(followersRes.data.data.followers || [])
-      setFollowing(followingRes.data.data.following || [])
+      setFollowers(followersRes.data.data || [])
+      setFollowing(followingRes.data.data || [])
       setIsLoading(false)
     } catch (err: any) {
       console.error('Error fetching profile:', err.response?.data || err.message)
@@ -40,22 +49,34 @@ export default function Profile() {
     }
   }
   fetchData()
-}, [username])
-
-  const handleToggleFollow = async () => {
-    try {
-      await followAPI.toggleFollow(user?._id!)
-      setIsFollowing(!isFollowing)
-    } catch (err) {
-      console.error('Failed to toggle follow')
-    }
-  }
+}, [username, currentUser])
 
   useEffect(() => {
   if (!isAuthenticated && !isLoading) {
     navigate('/login')
   }
 }, [isAuthenticated, navigate,isLoading])
+
+  const isOwnProfile = currentUser?._id === user?._id
+
+  const handleToggleFollow = async () => {
+    try {
+      await followAPI.toggleFollow(user?._id!)
+      setIsFollowing(!isFollowing)
+      
+      // Refetch followers after follow
+      const followersRes = await userAPI.getUserFollowers(username!, 1, 10)
+      setFollowers(followersRes.data.data || [])
+      
+      // If it's your own profile, refetch your following count too
+      if (isOwnProfile) {
+        const followingRes = await userAPI.getUserFollowing(username!, 1, 10)
+        setFollowing(followingRes.data.data || [])
+      }
+    } catch (err) {
+      console.error('Failed to toggle follow')
+    }
+  }
 
   if (isLoading) {
     return (
@@ -78,8 +99,6 @@ export default function Profile() {
       </div>
     )
   }
-
-  const isOwnProfile = currentUser?._id === user._id
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,5 +1,5 @@
 import {Router} from "express"
-import {getUserProfile, updateUserAvatar,changeCurrentPassword,getUserFollowers,getUserFollowing,getCurrentUser,updateAccountDetails,getUserBookmarks,getUserLikes} from "../controllers/user.controller.js"
+import {getUserProfile, updateUserAvatar,changeCurrentPassword,getUserFollowers,getUserFollowing,getCurrentUser,updateAccountDetails,getUserBookmarks,getUserLikes,getAllUsers} from "../controllers/user.controller.js"
 
 import { verifyJWT ,isAdmin} from "../middlewares/auth.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js"

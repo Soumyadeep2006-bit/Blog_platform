@@ -6,6 +6,7 @@ import Post from "./pages/Post.tsx"
 import CreatePost from './pages/CreatePost.tsx'
 import Profile from "./pages/Profile.tsx"
 import Dashboard from "./pages/Dashboard.tsx"
+import Admin from "./pages/Admin.tsx"
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
   { path: "/edit/:postId", element: <CreatePost /> },
   { path: "/profile/:username", element: <Profile /> },
   { path: "/dashboard", element: <Dashboard /> }, 
+   { path: "/admin", element: <Admin /> },
 ])
 
 export default function App() {
