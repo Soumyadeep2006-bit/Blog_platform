@@ -88,20 +88,25 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchInitialCounts = async () => {
       try {
-        const res = await userAPI.getUserLikes()
-        const likeData = res.data.data.likes || []
-        setLikedPosts(likeData.map((like: any) => like.post) || [])
+        const res = await postAPI.getPostsByUser(user?.username!)
+        const allPosts = Array.isArray(res.data.data) ? res.data.data : res.data.data.posts || []
+        
+        const likeData = await userAPI.getUserLikes()
+        setLikedPosts(likeData.data.data.likes?.map((like: any) => like.post) || [])
 
-          const bookmarksRes = await userAPI.getUserBookmarks()
-      const bookmarkData = bookmarksRes.data.data.bookmarks || []
-      setBookmarkedPosts(bookmarkData.map((bookmark: any) => bookmark.post) || [])
+        const bookmarksRes = await userAPI.getUserBookmarks()
+        setBookmarkedPosts(bookmarksRes.data.data.bookmarks?.map((bookmark: any) => bookmark.post) || [])
+        
+        setScheduledPosts(allPosts.filter((p: any) => p.status === 'scheduled'))
       } catch (err) {
-        console.error('Failed to fetch initial likes count')
+        console.error('Failed to fetch initial counts')
       }
     }
 
-    fetchInitialCounts()
-  }, [])
+    if (user?.username) {
+      fetchInitialCounts()
+    }
+  }, [user?.username])
 
   // On tab change
   useEffect(() => {
@@ -129,6 +134,17 @@ export default function Dashboard() {
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
   }, [activeTab])
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('Delete this post?')) return
+    try {
+      await postAPI.deletePost(postId)
+      setMyPosts(myPosts.filter(p => p._id !== postId))
+      setScheduledPosts(scheduledPosts.filter(p => p._id !== postId))
+    } catch (err) {
+      console.error('Failed to delete post')
+    }
+  }
 
   if (!isAuthenticated) {
     return null
@@ -216,24 +232,40 @@ export default function Dashboard() {
         ) : (
           <div className="grid gap-6">
             {posts.map((post, index) => (
-              <Link
+              <div
                 key={index}
-                to={`/post/${post.slug}`}
                 className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border-l-4 border-red-600"
               >
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
-                <p className="text-gray-600 mb-4 line-clamp-2">
-                 {post.body?.replace(/<[^>]*>/g, '') || 'No content'}
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <p>{new Date(post.createdAt).toLocaleDateString()}</p>
-                  <p>❤️ {post.likes?.length || 0} likes</p>
+                <div className="flex justify-between items-start gap-4">
+                  <Link
+                    to={`/post/${post.slug}`}
+                    className="flex-1"
+                  >
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
+                    <p className="text-gray-600 mb-4 line-clamp-2">
+                     {post.body?.replace(/<[^>]*>/g, '') || 'No content'}
+                    </p>
+                    <div className="flex justify-between items-center text-sm text-gray-500">
+                      <p>{new Date(post.createdAt).toLocaleDateString()}</p>
+                      <p>❤️ {post.likes?.length || 0} likes</p>
+                    </div>
+                  </Link>
+
+                  {/* Delete button (only for My Posts and Scheduled tabs) */}
+                  {(activeTab === 'posts' || activeTab === 'scheduled') && (
+                    <button
+                      onClick={() => handleDeletePost(post._id)}
+                      className="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700 font-medium whitespace-nowrap"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
       </div>
     </div>
   )
-}
+}   
