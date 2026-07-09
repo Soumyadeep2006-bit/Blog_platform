@@ -49,64 +49,74 @@ export default function Dashboard() {
   }
 
   const fetchBookmarks = async () => {
-    try {
-      setIsLoading(true)
-      const res = await userAPI.getUserBookmarks()
-      console.log('Bookmarks response:', res.data.data)
-      
-      const bookmarkData = res.data.data.bookmarks || []
-      const freshPosts = await Promise.all(
-        bookmarkData.map((bookmark: any) => postAPI.getPost(bookmark.post.slug))
-      )
-      setBookmarkedPosts(freshPosts.map(p => p.data.data))
-      setIsLoading(false)
-    } catch (err) {
-      console.error('Failed to fetch bookmarks')
-      setIsLoading(false)
-    }
+  try {
+    setIsLoading(true)
+    const res = await userAPI.getUserBookmarks()
+    console.log('Bookmarks response:', res.data.data)
+    
+    const bookmarkData = res.data.data.bookmarks || []
+    
+    const validBookmarks = bookmarkData.filter((b: any) => b.post)
+    
+    const freshPosts = await Promise.all(
+      validBookmarks.map((bookmark: any) => postAPI.getPost(bookmark.post.slug))
+    )
+    setBookmarkedPosts(freshPosts.map(p => p.data.data))
+    setIsLoading(false)
+  } catch (err) {
+    console.error('Failed to fetch bookmarks')
+    setIsLoading(false)
   }
+}
 
   const fetchLikes = async () => {
+  try {
+    setIsLoading(true)
+    const res = await userAPI.getUserLikes()
+    
+    const likeData = res.data.data.likes || []
+    
+    
+    const validLikes = likeData.filter((l: any) => l.post)
+    
+    const freshPosts = await Promise.all(
+      validLikes.map((like: any) => postAPI.getPost(like.post.slug))
+    )
+    setLikedPosts(freshPosts.map(p => p.data.data))
+    setIsLoading(false)
+  } catch (err) {
+    console.error('Failed to fetch likes')
+    setIsLoading(false)
+  }
+}
+ 
+ // On initial mount, fetch likes count
+useEffect(() => {
+  const fetchInitialCounts = async () => {
     try {
-      setIsLoading(true)
-      const res = await userAPI.getUserLikes()
-      console.log('Likes response:', res.data.data)
+      const res = await postAPI.getPostsByUser(user?.username!)
+      const allPosts = Array.isArray(res.data.data) ? res.data.data : res.data.data.posts || []
       
-      const likeData = res.data.data.likes || []
-      const freshPosts = await Promise.all(
-        likeData.map((like: any) => postAPI.getPost(like.post.slug))
-      )
-      setLikedPosts(freshPosts.map(p => p.data.data))
-      setIsLoading(false)
+      const likeData = await userAPI.getUserLikes()
+      // ← Filter out null posts
+      const validLikes = (likeData.data.data.likes || []).filter((like: any) => like.post)
+      setLikedPosts(validLikes.map((like: any) => like.post) || [])
+
+      const bookmarksRes = await userAPI.getUserBookmarks()
+      // ← Filter out null posts
+      const validBookmarks = (bookmarksRes.data.data.bookmarks || []).filter((b: any) => b.post)
+      setBookmarkedPosts(validBookmarks.map((bookmark: any) => bookmark.post) || [])
+      
+      setScheduledPosts(allPosts.filter((p: any) => p.status === 'scheduled'))
     } catch (err) {
-      console.error('Failed to fetch likes')
-      setIsLoading(false)
+      console.error('Failed to fetch initial counts')
     }
   }
 
-  // On initial mount, fetch likes count
-  useEffect(() => {
-    const fetchInitialCounts = async () => {
-      try {
-        const res = await postAPI.getPostsByUser(user?.username!)
-        const allPosts = Array.isArray(res.data.data) ? res.data.data : res.data.data.posts || []
-        
-        const likeData = await userAPI.getUserLikes()
-        setLikedPosts(likeData.data.data.likes?.map((like: any) => like.post) || [])
-
-        const bookmarksRes = await userAPI.getUserBookmarks()
-        setBookmarkedPosts(bookmarksRes.data.data.bookmarks?.map((bookmark: any) => bookmark.post) || [])
-        
-        setScheduledPosts(allPosts.filter((p: any) => p.status === 'scheduled'))
-      } catch (err) {
-        console.error('Failed to fetch initial counts')
-      }
-    }
-
-    if (user?.username) {
-      fetchInitialCounts()
-    }
-  }, [user?.username])
+  if (user?.username) {
+    fetchInitialCounts()
+  }
+}, [user?.username])
 
   // On tab change
   useEffect(() => {
