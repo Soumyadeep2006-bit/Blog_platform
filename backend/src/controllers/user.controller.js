@@ -125,9 +125,10 @@ const getUserFollowers=asyncHandler(async(req,res)=>{
 const getUserFollowing=asyncHandler(async(req,res)=>{
 
      const username=req.params?.username
-    const userId=await User.findOne({username})?._id
-
-    const following= await Follow.find({followedBy:userId}).populate("following","username fullName avatar")
+ 
+     const user = await User.findOne({username}) 
+    const userId = user?._id
+    const following = await Follow.find({followedBy:userId}).populate("following","username fullName avatar")
 
    
   return res.status(200).json(new ApiResponse(200,following,"User following list"))

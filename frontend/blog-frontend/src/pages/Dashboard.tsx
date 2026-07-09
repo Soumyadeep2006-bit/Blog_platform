@@ -91,6 +91,10 @@ export default function Dashboard() {
         const res = await userAPI.getUserLikes()
         const likeData = res.data.data.likes || []
         setLikedPosts(likeData.map((like: any) => like.post) || [])
+
+          const bookmarksRes = await userAPI.getUserBookmarks()
+      const bookmarkData = bookmarksRes.data.data.bookmarks || []
+      setBookmarkedPosts(bookmarkData.map((bookmark: any) => bookmark.post) || [])
       } catch (err) {
         console.error('Failed to fetch initial likes count')
       }

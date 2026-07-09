@@ -68,7 +68,7 @@ export default function Profile() {
       const followersRes = await userAPI.getUserFollowers(username!, 1, 10)
       setFollowers(followersRes.data.data || [])
       
-      // If it's your own profile, refetch your following count too
+      // Only refetch own following count if on own profile
       if (isOwnProfile) {
         const followingRes = await userAPI.getUserFollowing(username!, 1, 10)
         setFollowing(followingRes.data.data || [])

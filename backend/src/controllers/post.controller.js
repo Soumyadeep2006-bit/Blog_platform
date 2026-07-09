@@ -79,6 +79,16 @@ const createPost=asyncHandler(async(req,res)=>{
        const limit=parseInt(req.query.limit) || 10
        const skip=(page-1)*limit
 
+
+       await Post.updateMany(
+  { 
+    status: "scheduled",
+    scheduledAt: { $lte: new Date() }
+  },
+  { $set: { status: "published" } }
+)
+
+
        const posts=await Post.find({status:"published"})
        .populate("author","username fullName avatar")
        .populate("category","name slug")
@@ -119,7 +129,17 @@ const postsWithLikes = await Promise.all(
         if(!user){
             throw new ApiError(404,[],"User not found")
         }
-        const postsByUser=await Post.find({author:user._id,status:"published"})
+
+         await Post.updateMany(
+    { 
+      author: user._id, 
+      status: "scheduled",
+      scheduledAt: { $lte: new Date() }
+    },
+    { $set: { status: "published" } }
+  )
+
+        const postsByUser=await Post.find({author:user._id})
         .populate("author","username fullName avatar")
         .populate("category","name slug")
         .sort({createdAt:-1})
