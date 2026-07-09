@@ -7,6 +7,9 @@ import CreatePost from './pages/CreatePost.tsx'
 import Profile from "./pages/Profile.tsx"
 import Dashboard from "./pages/Dashboard.tsx"
 import Admin from "./pages/Admin.tsx"
+import Followers from './pages/Followers'
+import Following from './pages/Following'
+
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
@@ -16,6 +19,8 @@ const router = createBrowserRouter([
   { path: "/create", element: <CreatePost /> },
   { path: "/edit/:postId", element: <CreatePost /> },
   { path: "/profile/:username", element: <Profile /> },
+  { path: "/profile/:username/followers", element: <Followers /> },  // ← Add this
+  { path: "/profile/:username/following", element: <Following /> },
   { path: "/dashboard", element: <Dashboard /> }, 
    { path: "/admin", element: <Admin /> },
 ])

@@ -122,20 +122,21 @@ export default function Profile() {
               <p className="text-gray-700 mb-6">{user.bio || 'No bio yet'}</p>
 
               {/* Stats */}
-              <div className="flex gap-8 mb-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{posts.length}</p>
-                  <p className="text-gray-600">Posts</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{followers.length}</p>
-                  <p className="text-gray-600">Followers</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{following.length}</p>
-                  <p className="text-gray-600">Following</p>
-                </div>
-              </div>
+             
+<div className="flex gap-8 mb-6">
+  <div className="text-center">
+    <p className="text-2xl font-bold text-gray-900">{posts.length}</p>
+    <p className="text-gray-600">Posts</p>
+  </div>
+  <Link to={`/profile/${user.username}/followers`} className="text-center hover:text-red-600 transition">
+    <p className="text-2xl font-bold text-gray-900">{followers.length}</p>
+    <p className="text-gray-600">Followers</p>
+  </Link>
+  <Link to={`/profile/${user.username}/following`} className="text-center hover:text-red-600 transition">
+    <p className="text-2xl font-bold text-gray-900">{following.length}</p>
+    <p className="text-gray-600">Following</p>
+  </Link>
+</div>
 
               {/* Follow Button */}
               {!isOwnProfile && (
