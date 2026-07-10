@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate ,Link} from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import { postAPI, bookmarkAPI, likeAPI ,userAPI} from '../services/api'
+import { postAPI,userAPI} from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { Post } from '../types'
 

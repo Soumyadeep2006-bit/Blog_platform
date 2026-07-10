@@ -13,7 +13,7 @@ import { useAuth } from '../context/AuthContext'
 function CreatePost() {
   const navigate = useNavigate()
   const { postId } = useParams<{ postId?: string }>()
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated} = useAuth()
 
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')

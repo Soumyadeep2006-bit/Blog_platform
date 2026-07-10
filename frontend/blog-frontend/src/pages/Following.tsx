@@ -3,12 +3,12 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { userAPI } from '../services/api'
 import { useAuth } from '../context/AuthContext'
-import { User } from '../types'
+
 
 export default function Following() {
   const { username } = useParams<{ username: string }>()
   const navigate = useNavigate()
-  const { user: currentUser, isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth()
   const [following, setFollowing] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
