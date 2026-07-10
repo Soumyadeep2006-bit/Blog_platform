@@ -1,7 +1,7 @@
 import axios ,{AxiosInstance} from "axios"
 import {User,Post,Comment,ApiResponse} from "../types"
 
-const API_BASE_URL="http://localhost:8000/api/v1"
+const API_BASE_URL="https://flameproof-concentrative-jordy.ngrok-free.dev/api/v1"
 
 const apiClient:AxiosInstance=axios.create({
 baseURL:API_BASE_URL,
